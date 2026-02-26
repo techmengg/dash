@@ -24,7 +24,8 @@ public class PlayerMovement : MonoBehaviour
     [Header("References")]
     public Rigidbody2D rb;
     public InputAction moveAction;
-    public InputAction dashAction; 
+    public InputAction dashAction;
+    public PlayerHealth playerHealth;
 
     private Vector2 movement;
     private Vector2 previousMovement; // Tracks if we just started moving
@@ -144,7 +145,7 @@ public class PlayerMovement : MonoBehaviour
         isDashing = true;
         canDash = false;
 
-        // 2. Turn the trail ON right as the dash starts
+        if (playerHealth != null) playerHealth.BecomeInvincible();
         if (dashTrail != null) dashTrail.emitting = true;
 
         float startTime = Time.time;
@@ -155,7 +156,7 @@ public class PlayerMovement : MonoBehaviour
             yield return new WaitForFixedUpdate();
         }
 
-        // 3. Turn the trail OFF as soon as the movement part ends
+        if (playerHealth != null) playerHealth.RemoveInvincibility();
         if (dashTrail != null) dashTrail.emitting = false;
 
         isDashing = false;

@@ -2,27 +2,62 @@ using UnityEngine;
 
 public class PlayerHealth : MonoBehaviour
 {
-    // This will hold a reference to the component that draws our player's color
     public SpriteRenderer spriteRenderer;
+    
+    // Tracks if the player is currently invincible
+    public bool isInvincible = false; 
+    
+    // Tracks if the player is physically overlapping a trap zone
+    private bool isTouchingTrap = false;
 
-    // This built-in Unity function fires automatically when the player enters an "Is Trigger" collider
-    private void OnTriggerEnter2D(Collider2D collision)
+    // Called by the movement script when a dash starts
+    public void BecomeInvincible()
     {
-        // Check if the thing we just touched has the "Trap" tag
-        if (collision.CompareTag("Trap"))
+        isInvincible = true;
+        spriteRenderer.color = Color.green; // Visual proof of i-frames!
+    }
+
+    // Called by the movement script when a dash ends
+    public void RemoveInvincibility()
+    {
+        isInvincible = false;
+        
+        // If the dash ends and we are STILL standing on a trap, take damage immediately
+        if (isTouchingTrap)
         {
-            // Turn the player red!
             spriteRenderer.color = Color.red;
+        }
+        else
+        {
+            spriteRenderer.color = Color.white;
         }
     }
 
-    // Bonus: This fires when the player leaves the trigger zone
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Trap"))
+        {
+            isTouchingTrap = true;
+            
+            // Only turn red (take damage) if we are NOT invincible
+            if (!isInvincible) 
+            {
+                spriteRenderer.color = Color.red;
+            }
+        }
+    }
+
     private void OnTriggerExit2D(Collider2D collision)
     {
         if (collision.CompareTag("Trap"))
         {
-            // Turn the player back to their normal color (white is the default tint)
-            spriteRenderer.color = Color.white; 
+            isTouchingTrap = false;
+            
+            // Only revert to white if we aren't currently glowing green from a dash
+            if (!isInvincible) 
+            {
+                spriteRenderer.color = Color.white;
+            }
         }
     }
 }
