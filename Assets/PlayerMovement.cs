@@ -34,6 +34,9 @@ public class PlayerMovement : MonoBehaviour
     private bool isDashing = false;
     private bool canDash = true;
 
+    [Header("Visual Effects")]
+    public TrailRenderer dashTrail; // 1. Add a slot to hold the trail component
+
     private void OnEnable()
     {
         moveAction.Enable();
@@ -44,6 +47,15 @@ public class PlayerMovement : MonoBehaviour
     {
         moveAction.Disable();
         dashAction.Disable();
+    }
+
+    void Start()
+    {
+        // If we forgot to link it in the inspector, try to find it automatically
+        if (dashTrail == null) dashTrail = GetComponent<TrailRenderer>();
+
+        // Ensure the trail is OFF when the game starts
+        if (dashTrail != null) dashTrail.emitting = false;
     }
 
     void Update()
@@ -127,21 +139,27 @@ public class PlayerMovement : MonoBehaviour
 
     // --- THE ACTUAL DASH EXECUTION ---
 
-    private IEnumerator PerformDash(Vector2 dashDirection) 
+    private IEnumerator PerformDash(Vector2 dashDirection)
     {
         isDashing = true;
         canDash = false;
-        
+
+        // 2. Turn the trail ON right as the dash starts
+        if (dashTrail != null) dashTrail.emitting = true;
+
         float startTime = Time.time;
 
         while (Time.time < startTime + dashDuration)
         {
             rb.MovePosition(rb.position + dashDirection * dashSpeed * Time.fixedDeltaTime);
-            yield return new WaitForFixedUpdate(); 
+            yield return new WaitForFixedUpdate();
         }
+
+        // 3. Turn the trail OFF as soon as the movement part ends
+        if (dashTrail != null) dashTrail.emitting = false;
 
         isDashing = false;
         yield return new WaitForSeconds(dashCooldown);
-        canDash = true; 
+        canDash = true;
     }
 }
