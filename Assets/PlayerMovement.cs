@@ -1,14 +1,16 @@
+using System;
 using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class PlayerMovement : MonoBehaviour
 {
     public enum DashControlScheme 
     { 
         SpacebarDirection, 
-        MouseAim, 
-        DoubleTapWASD 
+        MouseAim
     }
 
     [Header("Testing Controls")]
@@ -19,24 +21,33 @@ public class PlayerMovement : MonoBehaviour
     public float dashSpeed = 15f;
     public float dashDuration = 0.2f;
     public float dashCooldown = 1f;
-    public float doubleTapTimeWindow = 0.3f; // Max time between taps
 
     [Header("References")]
     public Rigidbody2D rb;
     public InputAction moveAction;
     public InputAction dashAction;
     public PlayerHealth playerHealth;
-
-    private Vector2 movement;
-    private Vector2 previousMovement; // Tracks if we just started moving
-    private float lastTapTime;        // Tracks when the last key was pressed
-    private Vector2 lastTapDirection; // Tracks which key was pressed last
-    
-    private bool isDashing = false;
-    private bool canDash = true;
+    public Animator anim;
 
     [Header("Visual Effects")]
-    public TrailRenderer dashTrail; // 1. Add a slot to hold the trail component
+    public TrailRenderer dashTrail;
+
+    [Header("Stamina System")]
+    public float maxStamina = 100f;
+    public float currentStamina = 100f;
+    public float dashStaminaCost = 25f;
+    public float staminaRegenRate = 15f;
+    public Image staminaBarFill;
+
+    [Header("Status Effects")]
+    public float knockbackForce = 10f;
+    public float knockbackDuration = 0.15f;
+    public float stunDuration = 1f;
+
+    private Vector2 movement;
+    private bool isDashing = false;
+    private bool canDash = true;
+    public bool isStunned = false;
 
     private void OnEnable()
     {
@@ -52,16 +63,13 @@ public class PlayerMovement : MonoBehaviour
 
     void Start()
     {
-        // If we forgot to link it in the inspector, try to find it automatically
         if (dashTrail == null) dashTrail = GetComponent<TrailRenderer>();
-
-        // Ensure the trail is OFF when the game starts
         if (dashTrail != null) dashTrail.emitting = false;
     }
 
     void Update()
     {
-        if (isDashing) return;
+        if (isStunned || isDashing) return;
 
         movement = moveAction.ReadValue<Vector2>();
 
@@ -73,27 +81,37 @@ public class PlayerMovement : MonoBehaviour
             case DashControlScheme.MouseAim:
                 CheckMouseAimDash();
                 break;
-            case DashControlScheme.DoubleTapWASD:
-                CheckDoubleTapDash();
-                break;
         }
 
-        // Save this frame's movement to compare against the next frame
-        previousMovement = movement; 
+        if (currentStamina < maxStamina)
+        {
+            currentStamina += staminaRegenRate * Time.deltaTime;
+            currentStamina = Mathf.Min(currentStamina, maxStamina);
+        }
+        
+        if (staminaBarFill != null)
+        {
+            staminaBarFill.fillAmount = currentStamina / maxStamina;
+        }
+
+        if (anim != null)
+        {
+            anim.SetBool("isMoving", movement != Vector2.zero);
+        }
     }
 
     void FixedUpdate()
     {
-        if (isDashing) return;
+        if (isStunned || isDashing) return;
         rb.MovePosition(rb.position + movement * moveSpeed * Time.fixedDeltaTime);
     }
 
-    // --- DASH DETECTION METHODS ---
-
+    // --- DASH  METHODS ---
     private void CheckSpacebarDash()
     {
-        if (dashAction.WasPressedThisFrame() && canDash && movement != Vector2.zero)
+        if (dashAction.WasPressedThisFrame() && canDash && movement != Vector2.zero && currentStamina >= dashStaminaCost)
         {
+            currentStamina -= dashStaminaCost;
             StartCoroutine(PerformDash(movement.normalized));
         }
     }
@@ -101,45 +119,19 @@ public class PlayerMovement : MonoBehaviour
     private void CheckMouseAimDash()
     {
         // Triggers when you press your Dash button (Space/Shift)
-        if (dashAction.WasPressedThisFrame() && canDash)
+        if (dashAction.WasPressedThisFrame() && canDash && currentStamina >= dashStaminaCost)
         {
-            // 1. Get the mouse's pixel position on your monitor
+            currentStamina -= dashStaminaCost;
+            
             Vector2 mouseScreenPosition = Mouse.current.position.ReadValue();
-            
-            // 2. Convert those screen pixels into game world coordinates
             Vector2 mouseWorldPosition = Camera.main.ScreenToWorldPoint(mouseScreenPosition);
-            
-            // 3. Calculate the direction from the Player to the Mouse
             Vector2 dashDirection = (mouseWorldPosition - (Vector2)transform.position).normalized;
 
             StartCoroutine(PerformDash(dashDirection));
         }
     }
 
-    private void CheckDoubleTapDash()
-    {
-        // Check if the player JUST pressed a movement key this exact frame
-        if (movement != Vector2.zero && previousMovement == Vector2.zero)
-        {
-            // Did they press the same direction within 0.3 seconds?
-            if (movement == lastTapDirection && Time.time - lastTapTime <= doubleTapTimeWindow && canDash)
-            {
-                StartCoroutine(PerformDash(movement.normalized));
-                
-                // Reset the timer so they can't triple-tap to bypass the cooldown
-                lastTapTime = 0f; 
-            }
-            else
-            {
-                // If not a double tap, log this as the first tap
-                lastTapDirection = movement;
-                lastTapTime = Time.time;
-            }
-        }
-    }
-
     // --- THE ACTUAL DASH EXECUTION ---
-
     private IEnumerator PerformDash(Vector2 dashDirection)
     {
         isDashing = true;
@@ -163,4 +155,39 @@ public class PlayerMovement : MonoBehaviour
         yield return new WaitForSeconds(dashCooldown);
         canDash = true;
     }
+
+    public void ApplyKnockback(Vector2 direction)
+    {
+        if (!isStunned)
+        {
+            StartCoroutine(KnockbackCoroutine(direction));
+        }
+    }
+
+    // --- KNOCKBACK AND STUN EXECUTION ---
+    private IEnumerator KnockbackCoroutine(Vector2 knockbackDirection)
+    {
+        isStunned = true;
+        movement = Vector2.zero;
+
+        float angle = Mathf.Atan2(knockbackDirection.y, knockbackDirection.x) * Mathf.Rad2Deg;
+
+        transform.rotation = Quaternion.Euler(0, 0, angle);
+
+        float startTime = Time.time;
+
+        while (Time.time < startTime + knockbackDuration)
+        {
+            rb.MovePosition(rb.position + knockbackDirection * knockbackForce * Time.fixedDeltaTime);
+            yield return new WaitForFixedUpdate();
+        }
+
+        yield return new WaitForSeconds(stunDuration - knockbackDuration);
+
+        transform.rotation = Quaternion.identity;
+
+        isStunned = false;
+    }
+
+    
 }
