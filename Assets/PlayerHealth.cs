@@ -1,31 +1,47 @@
+using System.Collections;
+using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerHealth : MonoBehaviour
 {
-    public SpriteRenderer spriteRenderer;
-    
-    // Tracks if the player is currently invincible
-    public bool isInvincible = false; 
-    
-    // Tracks if the player is physically overlapping a trap zone
-    private bool isTouchingTrap = false;
+    [Header("Health Settings")]
+    public float maxHealth = 3f;
+    public float currentHealth = 3f;
+    public Image healthBarFill;
 
-    // Called by the movement script when a dash starts
+    [Header("References")]
+    public SpriteRenderer spriteRenderer;
+    public PlayerMovement playerMovement;
+
+    public bool isInvincible = false;
+    private Transform currentTrap = null;
+    private bool isDead = false;
+
+    void Start()
+    {
+        currentHealth = maxHealth;
+        UpdateHealthUI();
+    }
+
     public void BecomeInvincible()
     {
         isInvincible = true;
-        spriteRenderer.color = Color.green; // Visual proof of i-frames!
+        spriteRenderer.color = Color.green;
     }
 
-    // Called by the movement script when a dash ends
     public void RemoveInvincibility()
     {
         isInvincible = false;
-        
-        // If the dash ends and we are STILL standing on a trap, take damage immediately
-        if (isTouchingTrap)
+
+        if (currentTrap != null && !isDead)
         {
-            spriteRenderer.color = Color.red;
+            TakeDamage();
+            Vector2 knockbackDirection = (transform.position - currentTrap.position).normalized;
+            if (playerMovement != null)
+            {
+                playerMovement.ApplyKnockback(knockbackDirection);
+            }
         }
         else
         {
@@ -37,12 +53,18 @@ public class PlayerHealth : MonoBehaviour
     {
         if (collision.CompareTag("Trap"))
         {
-            isTouchingTrap = true;
-            
-            // Only turn red (take damage) if we are NOT invincible
-            if (!isInvincible) 
+            currentTrap = collision.transform;
+
+            if (!isInvincible && !isDead) 
             {
-                spriteRenderer.color = Color.red;
+                TakeDamage();
+
+                Vector2 knockbackDirection = (transform.position - collision.transform.position).normalized;
+                
+                if (playerMovement != null)
+                {
+                    playerMovement.ApplyKnockback(knockbackDirection);
+                }
             }
         }
     }
@@ -51,13 +73,54 @@ public class PlayerHealth : MonoBehaviour
     {
         if (collision.CompareTag("Trap"))
         {
-            isTouchingTrap = false;
-            
-            // Only revert to white if we aren't currently glowing green from a dash
-            if (!isInvincible) 
+            if (currentTrap == collision.transform)
+            {
+                currentTrap = null;
+            }
+
+            if (!isInvincible && !isDead) 
             {
                 spriteRenderer.color = Color.white;
             }
         }
+    }
+
+    private void TakeDamage()
+    {
+        if (isDead) return;
+
+        spriteRenderer.color = Color.red;
+        currentHealth -= 1f;
+        UpdateHealthUI();
+
+        if (currentHealth <= 0)
+        {
+            StartCoroutine(DieCoroutine());
+        }
+    }
+
+    private void UpdateHealthUI()
+    {
+        if (healthBarFill != null)
+        {
+            healthBarFill.fillAmount = currentHealth / maxHealth;
+        }
+    }
+
+    private IEnumerator DieCoroutine()
+    {
+        isDead = true;
+        spriteRenderer.color = Color.black;
+
+        if (playerMovement != null) playerMovement.isStunned = true;
+
+        yield return new WaitForSeconds(2f);
+
+        currentHealth = maxHealth;
+        UpdateHealthUI();
+        spriteRenderer.color = Color.white;
+        isDead = false;
+
+        if (playerMovement != null) playerMovement.isStunned = false;
     }
 }
