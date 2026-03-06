@@ -7,15 +7,6 @@ using UnityEngine.UI;
 
 public class PlayerMovement : MonoBehaviour
 {
-    public enum DashControlScheme 
-    { 
-        SpacebarDirection, 
-        MouseAim
-    }
-
-    [Header("Testing Controls")]
-    public DashControlScheme currentControlScheme = DashControlScheme.SpacebarDirection;
-
     [Header("Movement Settings")]
     public float moveSpeed = 5f;
     public float dashSpeed = 15f;
@@ -27,10 +18,11 @@ public class PlayerMovement : MonoBehaviour
     public InputAction moveAction;
     public InputAction dashAction;
     public PlayerHealth playerHealth;
-    public Animator anim;
 
     [Header("Visual Effects")]
     public TrailRenderer dashTrail;
+    public Image chargeFillImage;
+    public GameObject aimIndicator;
 
     [Header("Stamina System")]
     public float maxStamina = 100f;
@@ -38,11 +30,23 @@ public class PlayerMovement : MonoBehaviour
     public float dashStaminaCost = 25f;
     public float staminaRegenRate = 15f;
     public Image staminaBarFill;
+    public Image staminaPreviewFill;
+    private float projectedCost = 0f;
 
     [Header("Status Effects")]
     public float knockbackForce = 10f;
     public float knockbackDuration = 0.15f;
     public float stunDuration = 1f;
+
+    [Header("Charge Dash System")]
+    public float maxChargeTime = 1f;
+    public float maxChargeMultiplier = 2.5f;
+    public float maxChargeStaminaCost = 50f;
+    public float chargeDelay = 0.1f;
+
+    private bool isCharging = false;
+    private float currentChargeTime = 0f;
+    [HideInInspector] public float currentDashMultiplier = 1f;
 
     private Vector2 movement;
     private bool isDashing = false;
@@ -69,70 +73,107 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        if (isStunned || isDashing) return;
-
-        movement = moveAction.ReadValue<Vector2>();
-
-        switch (currentControlScheme)
+        if (!isCharging && !isDashing)
         {
-            case DashControlScheme.SpacebarDirection:
-                CheckSpacebarDash();
-                break;
-            case DashControlScheme.MouseAim:
-                CheckMouseAimDash();
-                break;
+            if (currentStamina < maxStamina)
+            {
+                currentStamina += staminaRegenRate * Time.deltaTime;
+                currentStamina = Mathf.Min(currentStamina, maxStamina);
+            }
         }
 
-        if (currentStamina < maxStamina)
+        if (staminaPreviewFill != null)
         {
-            currentStamina += staminaRegenRate * Time.deltaTime;
-            currentStamina = Mathf.Min(currentStamina, maxStamina);
+            staminaPreviewFill.fillAmount = currentStamina / maxStamina;
         }
         
         if (staminaBarFill != null)
         {
-            staminaBarFill.fillAmount = currentStamina / maxStamina;
+            staminaBarFill.fillAmount = Mathf.Max(0, currentStamina - projectedCost) / maxStamina;
         }
 
-        if (anim != null)
-        {
-            anim.SetBool("isMoving", movement != Vector2.zero);
-        }
+        CheckMouseAimDash();
+        UpdateAimIndicator();
+
+        if (isStunned || isDashing || isCharging) return;
+
+        movement = moveAction.ReadValue<Vector2>();
     }
 
     void FixedUpdate()
     {
-        if (isStunned || isDashing) return;
+        if (isStunned || isDashing || isCharging) return;
         rb.MovePosition(rb.position + movement * moveSpeed * Time.fixedDeltaTime);
     }
 
-    // --- DASH  METHODS ---
-    private void CheckSpacebarDash()
-    {
-        if (dashAction.WasPressedThisFrame() && canDash && movement != Vector2.zero && currentStamina >= dashStaminaCost)
-        {
-            currentStamina -= dashStaminaCost;
-            StartCoroutine(PerformDash(movement.normalized));
-        }
-    }
-
+    // DASH METHOD
     private void CheckMouseAimDash()
     {
-        // Triggers when you press your Dash button (Space/Shift)
-        if (dashAction.WasPressedThisFrame() && canDash && currentStamina >= dashStaminaCost)
+        // START CHARGING
+        if (dashAction.WasPressedThisFrame() && canDash && currentStamina >= dashStaminaCost && !isCharging)
         {
-            currentStamina -= dashStaminaCost;
+            isCharging = true;
+            currentChargeTime = 0f;
+
+            projectedCost = dashStaminaCost;
+
+            if (chargeFillImage != null) chargeFillImage.fillAmount = 0f;
+        }
+
+        // BUILD CHARGE
+        if (isCharging && dashAction.IsPressed())
+        {
+            float maxPossibleCharge = Mathf.Min(currentStamina, maxChargeStaminaCost);
+            float possibleChargePercent = Mathf.InverseLerp(dashStaminaCost, maxChargeStaminaCost, maxPossibleCharge);
+            float dynamicMaxChargeTime = maxChargeTime * possibleChargePercent;
+
+            currentChargeTime += Time.deltaTime;
+            currentChargeTime = Mathf.Clamp(currentChargeTime, 0f, dynamicMaxChargeTime);
+
+            if (currentChargeTime >= chargeDelay)
+            {
+                float chargePercent = currentChargeTime / maxChargeTime;
+
+                projectedCost = Mathf.Lerp(dashStaminaCost, maxChargeStaminaCost, chargePercent);
+
+                if (chargeFillImage != null)
+                {
+                    chargeFillImage.fillAmount = currentChargeTime / maxChargeTime;
+                }
+            }
             
+        }
+
+        // EXECUTE DASH
+        if (isCharging && dashAction.WasReleasedThisFrame())
+        {
+            isCharging = false;
+            projectedCost = 0f;
+
+            if (chargeFillImage != null) chargeFillImage.fillAmount = 0f;
+
+            float finalMultiplier = 1f;
+            float actualStaminaCost = dashStaminaCost;
+            
+            if (currentChargeTime > chargeDelay)
+            {
+                float chargePercent = currentChargeTime / maxChargeTime;
+                finalMultiplier = Mathf.Lerp(1f, maxChargeMultiplier, chargePercent);
+                actualStaminaCost = Mathf.Lerp(dashStaminaCost, maxChargeStaminaCost, chargePercent);
+            }
+
+            currentStamina -= actualStaminaCost;
+
             Vector2 mouseScreenPosition = Mouse.current.position.ReadValue();
             Vector2 mouseWorldPosition = Camera.main.ScreenToWorldPoint(mouseScreenPosition);
             Vector2 dashDirection = (mouseWorldPosition - (Vector2)transform.position).normalized;
 
-            StartCoroutine(PerformDash(dashDirection));
+            StartCoroutine(PerformDash(dashDirection, finalMultiplier));
         }
     }
 
     // --- THE ACTUAL DASH EXECUTION ---
-    private IEnumerator PerformDash(Vector2 dashDirection)
+    private IEnumerator PerformDash(Vector2 dashDirection, float multiplier)
     {
         isDashing = true;
         canDash = false;
@@ -141,10 +182,11 @@ public class PlayerMovement : MonoBehaviour
         if (dashTrail != null) dashTrail.emitting = true;
 
         float startTime = Time.time;
+        float finalDashSpeed = dashSpeed * multiplier;
 
         while (Time.time < startTime + dashDuration)
         {
-            rb.MovePosition(rb.position + dashDirection * dashSpeed * Time.fixedDeltaTime);
+            rb.MovePosition(rb.position + dashDirection * finalDashSpeed * Time.fixedDeltaTime);
             yield return new WaitForFixedUpdate();
         }
 
@@ -189,5 +231,46 @@ public class PlayerMovement : MonoBehaviour
         isStunned = false;
     }
 
+    private void UpdateAimIndicator()
+    {
+        if (aimIndicator ==  null) return;
+
+        if (isDashing || isStunned)
+        {
+            aimIndicator.SetActive(false);
+            return;
+        }
+
+        aimIndicator.SetActive(true);
+
+        Vector2 mouseScreenPosition = Mouse.current.position.ReadValue();
+        Vector2 mouseWorldPosition = Camera.main.ScreenToWorldPoint(mouseScreenPosition);
+        Vector2 dashDirection = (mouseWorldPosition - (Vector2)transform.position).normalized;
+
+        float currentMultiplier = 1f;
+
+        if (isCharging)
+        {
+            float maxPossibleCharge = Mathf.Min(currentStamina, maxChargeStaminaCost);
+            float possibleChargePercent = Mathf.InverseLerp(dashStaminaCost, maxChargeStaminaCost, maxPossibleCharge);
+            float dynamicMaxChargeTime = maxChargeTime * possibleChargePercent;
+
+            float clampedChargeTime = Mathf.Clamp(currentChargeTime, 0f, dynamicMaxChargeTime);
+
+            if (clampedChargeTime > chargeDelay)
+            {
+                float chargePercent = clampedChargeTime / maxChargeTime;
+                currentMultiplier = Mathf.Lerp(1f, maxChargeMultiplier, chargePercent);
+            }
+        }
+
+        float expectedDistance = dashSpeed * currentMultiplier * dashDuration;
+        Vector2 expectedEndPosition = (Vector2)transform.position + dashDirection * expectedDistance;
+
+        aimIndicator.transform.position = expectedEndPosition;
+
+        float angle = Mathf.Atan2(dashDirection.y, dashDirection.x) * Mathf.Rad2Deg;
+        aimIndicator.transform.rotation = Quaternion.Euler(0, 0, angle - 90f);
+    }
     
 }
