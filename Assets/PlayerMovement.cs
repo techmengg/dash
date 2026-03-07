@@ -23,6 +23,7 @@ public class PlayerMovement : MonoBehaviour
     public TrailRenderer dashTrail;
     public Image chargeFillImage;
     public GameObject aimIndicator;
+    public Image dashCooldownBar;
 
     [Header("Stamina System")]
     public float maxStamina = 100f;
@@ -43,10 +44,13 @@ public class PlayerMovement : MonoBehaviour
     public float maxChargeMultiplier = 2.5f;
     public float maxChargeStaminaCost = 50f;
     public float chargeDelay = 0.1f;
-
     private bool isCharging = false;
     private float currentChargeTime = 0f;
     [HideInInspector] public float currentDashMultiplier = 1f;
+
+    [Header("Combat Settings")]
+    public float baseDashDamage = 1f;
+    public float baseKnockbackForce = 10f;
 
     private Vector2 movement;
     private bool isDashing = false;
@@ -194,7 +198,25 @@ public class PlayerMovement : MonoBehaviour
         if (dashTrail != null) dashTrail.emitting = false;
 
         isDashing = false;
-        yield return new WaitForSeconds(dashCooldown);
+
+        float cooldownTimer = 0f;
+
+        if (dashCooldownBar != null) dashCooldownBar.fillAmount = 0f;
+
+        while (cooldownTimer < dashCooldown)
+        {
+            cooldownTimer += Time.deltaTime;
+
+            if (dashCooldownBar != null)
+            {
+                dashCooldownBar.fillAmount = cooldownTimer / dashCooldown;
+            }
+
+            yield return null;
+        }
+
+        if (dashCooldownBar != null) dashCooldownBar.fillAmount = 1f;
+
         canDash = true;
     }
 
@@ -271,6 +293,26 @@ public class PlayerMovement : MonoBehaviour
 
         float angle = Mathf.Atan2(dashDirection.y, dashDirection.x) * Mathf.Rad2Deg;
         aimIndicator.transform.rotation = Quaternion.Euler(0, 0, angle - 90f);
+    }
+
+    // --- DAMAGE DETECTION (SOLID COLLISIONS) ---
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (isDashing && collision.gameObject.CompareTag("Enemy"))
+        {
+            EnemyHealth enemy = collision.gameObject.GetComponent<EnemyHealth>();
+            
+            if (enemy != null)
+            {
+                float damageDealt = baseDashDamage * currentDashMultiplier;
+
+                float knockbackDealt = baseKnockbackForce * currentDashMultiplier;
+
+                Vector2 knockbackDirection = (collision.transform.position - transform.position).normalized;
+
+                enemy.TakeDamage(damageDealt, knockbackDirection, knockbackDealt);
+            }
+        }
     }
     
 }
