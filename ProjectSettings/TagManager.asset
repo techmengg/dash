@@ -5,11 +5,12 @@ TagManager:
   serializedVersion: 3
   tags:
   - Trap
+  - Enemy
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Trap
   - Water
   - UI
   - 
