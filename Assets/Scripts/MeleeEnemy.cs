@@ -7,6 +7,7 @@ public class MeleeEnemy : EnemyBase
     public float stopDistance = 0.2f;
     public float attackPauseDuration = 0.85f;
     private bool isPaused = false;
+    private Color defaultColor;
 
     public void Stun(float duration)
     {
@@ -24,7 +25,7 @@ public class MeleeEnemy : EnemyBase
         yield return new WaitForSeconds(duration);
 
         isStunned = false;
-        sr.color = Color.red;
+        sr.color = defaultColor;
     }
 
     protected override void Awake()
@@ -32,7 +33,7 @@ public class MeleeEnemy : EnemyBase
         base.Awake();
         detectionRange = 12f;
         moveSpeed = 4f;
-        sr.color = Color.red;
+        defaultColor = sr != null ? sr.color : Color.white;
     }
 
     protected override void OnCollisionStay2D(Collision2D collision)
