@@ -12,6 +12,11 @@ public class DungeonGenerator : MonoBehaviour
     public bool scaleDungeonWithMinimapSize = true;
     [Min(1)] public int referenceMinimapGridSize = 11;
 
+    [Header("Random Generation")]
+    public bool randomizeSeedOnGenerate = true;
+    public int fixedSeed = 12345;
+    [SerializeField] private int lastUsedSeed;
+
     private Dictionary<Vector2Int, RoomData> dungeonRooms = new Dictionary<Vector2Int, RoomData>();
 
     private MinimapDisplay EnsureMinimap()
@@ -61,6 +66,8 @@ public class DungeonGenerator : MonoBehaviour
 
     public void GenerateDungeon()
     {
+        ReseedRandomGenerator();
+
         minimap = EnsureMinimap();
 
         if (minimap != null)
@@ -129,6 +136,25 @@ public class DungeonGenerator : MonoBehaviour
         {
             rc.InitializeFirstRoom();
         }
+    }
+
+    private void ReseedRandomGenerator()
+    {
+        if (randomizeSeedOnGenerate)
+        {
+            unchecked
+            {
+                lastUsedSeed = System.Guid.NewGuid().GetHashCode()
+                    ^ (int)System.DateTime.UtcNow.Ticks
+                    ^ Time.frameCount;
+            }
+        }
+        else
+        {
+            lastUsedSeed = fixedSeed;
+        }
+
+        Random.InitState(lastUsedSeed);
     }
 
     private int GetScaledTargetCount(int baseTargetCount)
