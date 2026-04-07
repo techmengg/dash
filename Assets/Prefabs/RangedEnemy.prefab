@@ -14,7 +14,8 @@ GameObject:
   - component: {fileID: 2066669127296092453}
   - component: {fileID: 5785798271916597381}
   - component: {fileID: 6713790485045288830}
-  m_Layer: 0
+  - component: {fileID: -7075330201451071276}
+  m_Layer: 7
   m_Name: RangedEnemy
   m_TagString: Enemy
   m_Icon: {fileID: 0}
@@ -31,8 +32,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -2.93, y: 0.08, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 0.8, y: 0.8, z: 0.8}
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 4298784168642825992}
   m_Father: {fileID: 0}
@@ -87,7 +88,7 @@ SpriteRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: -712631045867808456, guid: b670ab75dde984907b8570040daa08c5, type: 3}
-  m_Color: {r: 0, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -181,16 +182,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2403be9ca9de66045983a978f14e3e16, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
-  maxHealth: 8
-  currentHealth: 8
+  maxHealth: 16
+  currentHealth: 16
   respawnDelay: 5
+  canRespawn: 1
   spriteRenderer: {fileID: 1773623096204192238}
   rb: {fileID: 2066669127296092453}
   knockbackResistance: 0.6
   maxKnockbackForce: 2
   flashDuration: 0.12
   damageFlashColor: {r: 1, g: 0, b: 0, a: 1}
-  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
   healthBarRoot: {fileID: 0}
   healthBarFill: {fileID: 0}
   knockbackDuration: 0.15
@@ -208,18 +210,67 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RangedEnemy
   moveSpeed: 1
   detectionRange: 20
-  contactDamage: 1
+  contactDamage: 0
   trapCheckRadius: 1.2
   trapAvoidWeight: 2.5
   trapLayer:
     serializedVersion: 2
     m_Bits: 8
+  wallLayer:
+    serializedVersion: 2
+    m_Bits: 64
+  wallCheckDist: 1.5
+  idleFrame1: {fileID: 3763752930381237044, guid: f9e41566aacd9c849b7e6b6117a691ff, type: 3}
+  idleFrame2: {fileID: -445332791505162358, guid: f9e41566aacd9c849b7e6b6117a691ff, type: 3}
+  walkFrame1: {fileID: 109718205546589128, guid: f9e41566aacd9c849b7e6b6117a691ff, type: 3}
+  walkFrame2: {fileID: -8637498362619983186, guid: f9e41566aacd9c849b7e6b6117a691ff, type: 3}
+  animationSwapSeconds: 0.12
   preferredDistance: 8
-  retreatDistance: 2.5
-  shootCooldown: 1.25
-  projectileSpeed: 10
+  retreatDistance: 4
+  shootCooldown: 1.5
+  projectileSpeed: 8
   projectilePrefab: {fileID: 4620158495218821848, guid: 2c2751a4fa4f58a46be3ea55e7d63af3, type: 3}
   firePoint: {fileID: 4298784168642825992}
+  strafeSpeed: 3
+--- !u!114 &-7075330201451071276
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3306855681503045834}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd1b9d79f3c25084b832eb2855278851, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyAudio
+  enemyAudioSource: {fileID: 0}
+  attackLoopSource: {fileID: 0}
+  rollLoopSource: {fileID: 0}
+  spawnSfx: {fileID: 8300000, guid: 9e002caf731666249af005ec8594afec, type: 3}
+  spawnSfxVolume: 0.9
+  damageSfx: {fileID: 8300000, guid: 615adc11fe7cfe1458640bd2dc904004, type: 3}
+  damageSfxVolume: 0.487
+  deathSfx: {fileID: 8300000, guid: 8743913db95f0cb4485388288ddda742, type: 3}
+  deathSfxVolume: 1
+  attackSfx: {fileID: 0}
+  attackSfxVolume: 0.9
+  attackLoopSfx: {fileID: 0}
+  attackLoopSfxVolume: 0.85
+  rollLoopSfx: {fileID: 0}
+  rollLoopSfxVolume: 1
+  stunSfx: {fileID: 8300000, guid: 55eab68558e4cc84e99f39817c0a20c9, type: 3}
+  stunSfxVolume: 0.9
+  projectileFireSfx: {fileID: 8300000, guid: 8dca6c95d4302684fabc267e1c08c4cc, type: 3}
+  projectileFireSfxVolume: 0.9
+  projectileImpactSfx: {fileID: 8300000, guid: cb1b02c1792b8154ab75ac4909d5f5de, type: 3}
+  projectileImpactSfxVolume: 1
+  playRandomGrunts: 1
+  randomGruntSfx:
+  - {fileID: 8300000, guid: 8d6038c5311a4334c81ebfd5ff8adcc9, type: 3}
+  randomGruntVolume: 0.4
+  randomGruntMinInterval: 3.5
+  randomGruntMaxInterval: 8
 --- !u!1 &8575484404437014412
 GameObject:
   m_ObjectHideFlags: 0
@@ -229,7 +280,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4298784168642825992}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: FirePoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}

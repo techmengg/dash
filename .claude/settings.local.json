@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls C:/Users/aingt/DASH/DASH/Assets/Scripts/*.meta)",
+      "Bash(ls -la /c/Users/aingt/DASH/DASH/Assets/Scripts/*.cs)",
+      "Bash(ls -1 /c/Users/aingt/DASH/DASH/Assets/Scripts/*.cs)"
+    ]
+  }
+}

@@ -14,7 +14,8 @@ GameObject:
   - component: {fileID: 8747106799432067485}
   - component: {fileID: 6953274543961344608}
   - component: {fileID: 8406644763062184022}
-  m_Layer: 0
+  - component: {fileID: -6360502718147771829}
+  m_Layer: 7
   m_Name: MeleeEnemy
   m_TagString: Enemy
   m_Icon: {fileID: 0}
@@ -31,8 +32,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -6.63, y: 3.05, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 0.8, y: 0.8, z: 0.8}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -180,16 +181,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2403be9ca9de66045983a978f14e3e16, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
-  maxHealth: 12
-  currentHealth: 12
+  maxHealth: 22
+  currentHealth: 22
   respawnDelay: 5
+  canRespawn: 1
   spriteRenderer: {fileID: 4068204667117307477}
   rb: {fileID: 8747106799432067485}
   knockbackResistance: 0.6
   maxKnockbackForce: 2
   flashDuration: 0.12
   damageFlashColor: {r: 1, g: 0, b: 0, a: 1}
-  normalColor: {r: 0.54054016, g: 0.125534, b: 0.8584906, a: 1}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
   healthBarRoot: {fileID: 0}
   healthBarFill: {fileID: 0}
   knockbackDuration: 0.15
@@ -205,13 +207,65 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5338b0b0ccb78904aa3f92f91bb1dece, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MeleeEnemy
-  moveSpeed: 2
-  detectionRange: 12
-  contactDamage: 1
+  moveSpeed: 1
+  detectionRange: 18
+  contactDamage: 3
   trapCheckRadius: 1.2
   trapAvoidWeight: 2.5
   trapLayer:
     serializedVersion: 2
     m_Bits: 8
-  stopDistance: 0.2
+  wallLayer:
+    serializedVersion: 2
+    m_Bits: 64
+  wallCheckDist: 1.5
+  idleFrame1: {fileID: -1603291472181913768, guid: b79628cf115de024a9fefa41cdf47cbc, type: 3}
+  idleFrame2: {fileID: 1727701513693895514, guid: b79628cf115de024a9fefa41cdf47cbc, type: 3}
+  walkFrame1: {fileID: 6885142304389756897, guid: b79628cf115de024a9fefa41cdf47cbc, type: 3}
+  walkFrame2: {fileID: -3920763251539160592, guid: b79628cf115de024a9fefa41cdf47cbc, type: 3}
+  animationSwapSeconds: 0.12
+  stopDistance: 0.1
   attackPauseDuration: 0.85
+  strafeSpeed: 2.5
+  lungeRange: 3
+  lungeSpeedMultiplier: 1.8
+  circleDistance: 4
+--- !u!114 &-6360502718147771829
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1987334212539757070}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd1b9d79f3c25084b832eb2855278851, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyAudio
+  enemyAudioSource: {fileID: 0}
+  attackLoopSource: {fileID: 0}
+  rollLoopSource: {fileID: 0}
+  spawnSfx: {fileID: 8300000, guid: 9e002caf731666249af005ec8594afec, type: 3}
+  spawnSfxVolume: 1
+  damageSfx: {fileID: 8300000, guid: 615adc11fe7cfe1458640bd2dc904004, type: 3}
+  damageSfxVolume: 0.496
+  deathSfx: {fileID: 8300000, guid: 8743913db95f0cb4485388288ddda742, type: 3}
+  deathSfxVolume: 1
+  attackSfx: {fileID: 8300000, guid: 378b071a55d83504392537e27c9d2064, type: 3}
+  attackSfxVolume: 0.9
+  attackLoopSfx: {fileID: 0}
+  attackLoopSfxVolume: 0.85
+  rollLoopSfx: {fileID: 0}
+  rollLoopSfxVolume: 1
+  stunSfx: {fileID: 8300000, guid: 55eab68558e4cc84e99f39817c0a20c9, type: 3}
+  stunSfxVolume: 0.9
+  projectileFireSfx: {fileID: 0}
+  projectileFireSfxVolume: 0.9
+  projectileImpactSfx: {fileID: 0}
+  projectileImpactSfxVolume: 1
+  playRandomGrunts: 1
+  randomGruntSfx:
+  - {fileID: 8300000, guid: e168c0f10349556439dc8fecbc9a1e5b, type: 3}
+  randomGruntVolume: 1
+  randomGruntMinInterval: 3.5
+  randomGruntMaxInterval: 8

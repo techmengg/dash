@@ -1,0 +1,391 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &3123395181269053815
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2533914743267314202}
+  - component: {fileID: 5521355148606711148}
+  - component: {fileID: 7390753943814864735}
+  - component: {fileID: 7030650843305536426}
+  - component: {fileID: 5198545490741584840}
+  - component: {fileID: 4809441541933591007}
+  - component: {fileID: 4409739013875825673}
+  - component: {fileID: 4916674664370649927}
+  m_Layer: 0
+  m_Name: Boss
+  m_TagString: Enemy
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2533914743267314202
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3123395181269053815}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -7.3, y: 3.35, z: 0}
+  m_LocalScale: {x: 1.3, y: 1.3, z: 1.3}
+  m_ConstrainProportionsScale: 1
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!212 &5521355148606711148
+SpriteRenderer:
+  serializedVersion: 2
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3123395181269053815}
+  m_Enabled: 1
+  m_CastShadows: 0
+  m_ReceiveShadows: 0
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 0
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_MaskInteraction: 0
+  m_Sprite: {fileID: 8457434935450504434, guid: 128a0486d34c7ae40881d8be73902dbd, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_FlipX: 0
+  m_FlipY: 0
+  m_DrawMode: 0
+  m_Size: {x: 1.94, y: 2.5}
+  m_AdaptiveModeThreshold: 0.5
+  m_SpriteTileMode: 0
+  m_WasSpriteAssigned: 1
+  m_SpriteSortPoint: 0
+--- !u!50 &7390753943814864735
+Rigidbody2D:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3123395181269053815}
+  m_BodyType: 0
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 50
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_GravityScale: 0
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 4
+--- !u!60 &7030650843305536426
+PolygonCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3123395181269053815}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 1.94, y: 2.5}
+    newSize: {x: 1.94, y: 2.5}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Points:
+    m_Paths:
+    - - {x: 0.65999997, y: -1.24}
+      - {x: 0.64612186, y: -1.1659182}
+      - {x: 0.56408125, y: -1.0279593}
+      - {x: 0.72999996, y: -1.03}
+      - {x: 0.82, y: -0.95}
+      - {x: 0.8124479, y: -0.5022443}
+      - {x: 0.96999997, y: -0.48}
+      - {x: 0.96999997, y: -0.09387762}
+      - {x: 0.82, y: -0.099999994}
+      - {x: 0.83, y: 0.13}
+      - {x: 0.70224476, y: 0.27428514}
+      - {x: 0.4924484, y: 0.43428537}
+      - {x: 0.35408127, y: 0.5142854}
+      - {x: 0.34061092, y: 1.116326}
+      - {x: 0.22877443, y: 1.1385708}
+      - {x: -0.3906114, y: 1.122652}
+      - {x: -0.42081505, y: 0.9610182}
+      - {x: -0.44469267, y: 0.8642849}
+      - {x: -0.4304073, y: 0.8359187}
+      - {x: -0.41408125, y: 0.55326295}
+      - {x: -0.52, y: 0.48}
+      - {x: -0.568163, y: 0.47}
+      - {x: -0.78224474, y: 0.01040753}
+      - {x: -0.96999997, y: -0.01}
+      - {x: -0.96999997, y: -0.38}
+      - {x: -0.90999997, y: -0.39999998}
+      - {x: -0.9, y: -0.91999996}
+      - {x: -0.9, y: -0.96999997}
+      - {x: -0.5724479, y: -1.034489}
+      - {x: -0.63836664, y: -1.25}
+      - {x: -0.22, y: -1.25}
+      - {x: -0.21, y: -1.1}
+      - {x: 0.21, y: -1.0987744}
+      - {x: 0.2520374, y: -1.2579591}
+  m_UseDelaunayMesh: 1
+--- !u!114 &5198545490741584840
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3123395181269053815}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d5ac6068592c714cb663da4668dfa59, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BossEnemy
+  moveSpeed: 5
+  detectionRange: 40
+  contactDamage: 0
+  trapCheckRadius: 0.8
+  trapAvoidWeight: 0.8
+  trapLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  wallLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  wallCheckDist: 1.5
+  stopDistance: 1.5
+  attackCooldown: 2
+  grabRange: 2
+  grabTelegraphTime: 0.6
+  chewDuration: 1.5
+  eatDamage: 6
+  spitOutForce: 4
+  leapMinRange: 5
+  leapMaxRange: 25
+  leapTravelTime: 1.5
+  leapLandPause: 1
+  leapAoeRadius: 6
+  leapDamage: 8
+  leapKnockbackForce: 4
+  leapSlamCooldown: 4
+  playerLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  leapFrame1: {fileID: 4435467495681141675, guid: 71e202153e43ece4483dd4281fe23802, type: 3}
+  leapFrame2: {fileID: -6910802543995655571, guid: 71e202153e43ece4483dd4281fe23802, type: 3}
+  leapFrame3: {fileID: 7814226548700865890, guid: 71e202153e43ece4483dd4281fe23802, type: 3}
+  leapFrame4: {fileID: 1670938396, guid: 71e202153e43ece4483dd4281fe23802, type: 3}
+  leapFrame5: {fileID: 648903075, guid: 71e202153e43ece4483dd4281fe23802, type: 3}
+  slamTelegraphDuration: 0.55
+  slamScreenShakeMagnitude: 0.3
+  slamScreenShakeDuration: 0.4
+  slamShockwaveRadius: 6
+  slamCrackCount: 6
+  slamCrackLength: 5
+  slamCrackDuration: 2
+  slamArcHeight: 2.5
+  slamHitPauseDuration: 0.055
+  slamAfterimageCount: 3
+  grabSprite: {fileID: -6441532830649324285, guid: 3f7488de68199014eb1a2371aaefedb0, type: 3}
+  eatSprite: {fileID: 9133794035168007186, guid: 3f7488de68199014eb1a2371aaefedb0, type: 3}
+  idleFrame1: {fileID: 8457434935450504434, guid: 128a0486d34c7ae40881d8be73902dbd, type: 3}
+  idleFrame2: {fileID: 256800213450999720, guid: 128a0486d34c7ae40881d8be73902dbd, type: 3}
+  walkFrame1: {fileID: -8987584008612887955, guid: c1f204e87b02a4d46a56eee58b83f74d, type: 3}
+  walkFrame2: {fileID: 6732685747393438846, guid: c1f204e87b02a4d46a56eee58b83f74d, type: 3}
+  animationSpeed: 0.4
+  meleePrefab: {fileID: 1987334212539757070, guid: f8ca285d33c3472439aedffba8dc7072, type: 3}
+  rangedPrefab: {fileID: 3306855681503045834, guid: b1e3d1d4f99014d4b8716dc897084015, type: 3}
+  meleeSpawnChance: 0.6
+  summonCount: 4
+  summonCooldown: 4
+  summonSpawnRadius: 4
+  summonAnimDuration: 4
+  throwChance: 1
+  throwCheckRange: 5
+  throwSpeed: 20
+  throwDamage: 4
+  throwKnockbackForce: 5
+  throwCooldown: 2
+  consecutiveHitsToRoll: 8
+  consecutiveHitWindow: 2
+  rollDuration: 6
+  rollSpeed: 20
+  rollRotationSpeed: 720
+  rollDamage: 8
+  rollKnockbackForce: 10
+  hasPhase2: 1
+  phase2MaxHealth: 200
+  phase2MoveSpeedMultiplier: 1.36
+  phase2AttackCooldownMultiplier: 0.6
+  phase2EatDamageMultiplier: 1.5
+  phase2LeapDamageMultiplier: 1.5
+  phase2LeapAoeRadiusMultiplier: 1.5
+  phase2RollSpeedMultiplier: 1
+  transitionDuration: 3
+  phase2TintColor: {r: 1, g: 0.49179113, b: 0.24056602, a: 1}
+  phase2IdleFrame1: {fileID: 0}
+  phase2IdleFrame2: {fileID: 0}
+  phase2WalkFrame1: {fileID: 0}
+  phase2WalkFrame2: {fileID: 0}
+  obstacleLayer:
+    serializedVersion: 2
+    m_Bits: 0
+--- !u!114 &4809441541933591007
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3123395181269053815}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2403be9ca9de66045983a978f14e3e16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
+  maxHealth: 100
+  currentHealth: 100
+  respawnDelay: 5
+  canRespawn: 1
+  spriteRenderer: {fileID: 5521355148606711148}
+  rb: {fileID: 7390753943814864735}
+  knockbackResistance: 0.9
+  maxKnockbackForce: 2
+  flashDuration: 0.12
+  damageFlashColor: {r: 1, g: 0, b: 0, a: 1}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  healthBarRoot: {fileID: 0}
+  healthBarFill: {fileID: 0}
+  knockbackDuration: 0.15
+--- !u!114 &4409739013875825673
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3123395181269053815}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 759cf5fa4e471d34cb55c4be42b95615, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BossHealthBar
+  bossHealth: {fileID: 0}
+  bossName: Bob, Sin of Gluttony
+  barWidth: 600
+  barHeight: 18
+  borderThickness: 3
+  topOffset: -60
+  barColor: {r: 0.75, g: 0.15, b: 0.15, a: 1}
+  backgroundColor: {r: 0.12, g: 0.12, b: 0.12, a: 1}
+  borderColor: {r: 0.6, g: 0.55, b: 0.35, a: 1}
+  phase2BarColor: {r: 0.9, g: 0.1, b: 0.1, a: 1}
+  phase2BossName: BOB, THE GLUTTONOUS
+  drainSpeed: 2
+  hideUntilBossArenaEntry: 1
+  revealFadeDuration: 0.5
+--- !u!114 &4916674664370649927
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3123395181269053815}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b9170b0083587b549b50e5dea87bdff4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BossAudio
+  bossAudioSource: {fileID: 0}
+  bossActionAudioSource: {fileID: 0}
+  bossWalkLoopSource: {fileID: 0}
+  bossChewLoopSource: {fileID: 0}
+  bossWalkLoopSfx: {fileID: 8300000, guid: d7ca33ad0f24dc84db57c73c6b48b454, type: 3}
+  bossWalkLoopSfxVolume: 0.85
+  bossGrabSfx: {fileID: 8300000, guid: 86ac8a77ffd2a554fb3b319cbb36fb94, type: 3}
+  bossGrabSfxVolume: 1
+  bossDamageSfx: {fileID: 8300000, guid: 8832c742c42fcc64988b84e0208a77f3, type: 3}
+  bossDamageSfxVolume: 1
+  bossDamageSfxMinInterval: 0.12
+  bossDeathSfx: {fileID: 8300000, guid: daef4e4bd7429e04ba8f6606d791ac7d, type: 3}
+  bossDeathSfxVolume: 1
+  bossChewLoopSfx: {fileID: 8300000, guid: c6c7b61a34b59e6449f10f04e3d8b381, type: 3}
+  bossChewLoopSfxVolume: 0.9
+  bossTossSfx: {fileID: 8300000, guid: 27fbdf0ec69f68b4e8e6c167e129e894, type: 3}
+  bossTossSfxVolume: 1
+  bossGroundSlamSfx: {fileID: 8300000, guid: fef7ce1f1b6024d4a8292e1c58c0267c, type: 3}
+  bossGroundSlamSfxVolume: 1
