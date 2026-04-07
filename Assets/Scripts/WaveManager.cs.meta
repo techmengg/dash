@@ -1,0 +1,13 @@
+fileFormatVersion: 2
+guid: 8175aeb53e725544a818fe4fbe1fc8d5
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - meleePrefab: {fileID: 1987334212539757070, guid: f8ca285d33c3472439aedffba8dc7072, type: 3}
+  - rangedPrefab: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

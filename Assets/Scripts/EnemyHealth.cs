@@ -8,6 +8,7 @@ public class EnemyHealth : MonoBehaviour
     public float maxHealth = 3f;
     public float currentHealth = 3f;
     public float respawnDelay = 3f;
+    public bool canRespawn = true;
 
     [Header("References")]
     public SpriteRenderer spriteRenderer;
@@ -31,16 +32,42 @@ public class EnemyHealth : MonoBehaviour
     private Collider2D[] colliders;
     private MonoBehaviour[] scripts;
     private Coroutine flashCoroutine;
+    private EnemyAudio enemyAudio;
+    private BossAudio bossAudio;
+    private BossEnemy bossEnemy;
 
-    public bool IsDead { get; private set; }
+    public bool IsDead { get; set; }
+
+    /// <summary>
+    /// If set, this callback fires instead of RespawnRoutine when health reaches 0.
+    /// Used by BossEnemy to intercept death for Phase 2 transition.
+    /// </summary>
+    public System.Action<EnemyHealth> onDeathOverride;
+
+    public void SetDead(bool dead)
+    {
+        IsDead = dead;
+    }
 
     private void Awake()
     {
         if (spriteRenderer == null)
             spriteRenderer = GetComponent<SpriteRenderer>();
 
+        // Keep enemies color-neutral by default.
+        normalColor = Color.white;
+        if (spriteRenderer != null)
+            spriteRenderer.color = normalColor;
+
         if (rb == null)
             rb = GetComponent<Rigidbody2D>();
+
+        enemyAudio = GetComponent<EnemyAudio>();
+        if (enemyAudio == null)
+            enemyAudio = gameObject.AddComponent<EnemyAudio>();
+
+        bossAudio = GetComponent<BossAudio>();
+        bossEnemy = GetComponent<BossEnemy>();
 
         colliders = GetComponents<Collider2D>();
         scripts = GetComponents<MonoBehaviour>();
@@ -52,6 +79,9 @@ public class EnemyHealth : MonoBehaviour
             healthBarRoot.SetActive(false);
 
         UpdateHealthBar();
+
+        if (enemyAudio != null)
+            enemyAudio.PlaySpawnSfx();
     }
 
     public void SetSpawnPoint(Vector2 point)
@@ -68,8 +98,21 @@ public class EnemyHealth : MonoBehaviour
     {
         if (IsDead) return;
 
+        if (enemyAudio == null)
+            enemyAudio = GetComponent<EnemyAudio>();
+
+        if (bossAudio == null)
+            bossAudio = GetComponent<BossAudio>();
+
+        if (bossEnemy == null)
+            bossEnemy = GetComponent<BossEnemy>();
+
         currentHealth -= damage;
         currentHealth = Mathf.Max(0f, currentHealth);
+
+        bool playedBossDamageSfx = bossAudio != null && bossAudio.TryPlayBossDamageSfx();
+        if (!playedBossDamageSfx && enemyAudio != null)
+            enemyAudio.PlayDamageSfx();
 
         if (healthBarRoot != null)
             healthBarRoot.SetActive(true);
@@ -86,7 +129,23 @@ public class EnemyHealth : MonoBehaviour
 
         if (currentHealth <= 0f)
         {
-            StartCoroutine(RespawnRoutine());
+            if (!IsDead)
+            {
+                IsDead = true;
+
+                bool allowBossDeathSfx = bossEnemy == null || !bossEnemy.hasPhase2 || bossEnemy.CurrentPhase >= 2;
+                bool playedBossDeathSfx = allowBossDeathSfx && bossAudio != null && bossAudio.TryPlayBossDeathSfx();
+
+                if (!playedBossDeathSfx && enemyAudio != null)
+                    enemyAudio.PlayDeathSfx();
+            }
+
+            if (onDeathOverride != null)
+                onDeathOverride.Invoke(this);
+            else if (!canRespawn)
+                StartCoroutine(PermanentDeathRoutine());
+            else
+                StartCoroutine(RespawnRoutine());
         }
     }
 
@@ -166,6 +225,35 @@ public class EnemyHealth : MonoBehaviour
                 script.enabled = true;
         }
 
+        if (enemyAudio == null)
+            enemyAudio = GetComponent<EnemyAudio>();
+
+        if (enemyAudio != null)
+            enemyAudio.PlaySpawnSfx();
+
         IsDead = false;
+    }
+
+    private IEnumerator PermanentDeathRoutine()
+    {
+        IsDead = true;
+
+        if (spriteRenderer != null)
+            spriteRenderer.enabled = false;
+
+        foreach (var col in colliders)
+            col.enabled = false;
+
+        foreach (var script in scripts)
+        {
+            if (script != this)
+                script.enabled = false;
+        }
+
+        if (healthBarRoot != null)
+            healthBarRoot.SetActive(false);
+
+        yield return null;
+        Destroy(gameObject);
     }
 }
