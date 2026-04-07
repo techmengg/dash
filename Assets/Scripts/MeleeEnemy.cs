@@ -15,6 +15,11 @@ public class MeleeEnemy : EnemyBase
     private bool isPaused = false;
     private Color defaultColor;
 
+    [Header("Aggression Tuning")]
+    [Min(0.5f)] public float aggressionMultiplier = 1.35f;
+    [Min(0.5f)] public float attackRateMultiplier = 1.6f;
+    [Min(0.05f)] public float minAttackPauseDuration = 0.25f;
+
     [Header("Smart Behavior")]
     public float strafeSpeed = 2.5f;
     public float lungeRange = 3f;
@@ -50,15 +55,22 @@ public class MeleeEnemy : EnemyBase
     {
         base.Awake();
         detectionRange = 12f;
-        moveSpeed = 4f;
+        float clampedAggression = Mathf.Clamp(aggressionMultiplier, 0.5f, 3f);
+        float clampedAttackRate = Mathf.Clamp(attackRateMultiplier, 0.5f, 3f);
+
+        moveSpeed = 4f * clampedAggression;
         defaultColor = Color.white;
         if (sr != null)
             sr.color = defaultColor;
 
+        attackPauseDuration = Mathf.Max(minAttackPauseDuration, attackPauseDuration / clampedAttackRate);
+        strafeSpeed *= clampedAggression;
+        lungeSpeedMultiplier *= Mathf.Lerp(1f, clampedAggression, 0.75f);
+
         // Randomize initial behavior so enemies don't all act the same
         strafeDir = Random.value > 0.5f ? 1f : -1f;
-        nextStrafeSwitch = Random.Range(1.5f, 4f);
-        circleDistance = Random.Range(3f, 5f);
+        nextStrafeSwitch = Random.Range(1.2f, 3.2f) / clampedAttackRate;
+        circleDistance = Random.Range(2.4f, 4.2f) / Mathf.Lerp(1f, 1.15f, clampedAggression - 1f);
     }
 
     protected override void Start()
@@ -202,7 +214,7 @@ public class MeleeEnemy : EnemyBase
         isPaused = false;
         // After attacking, back off and circle again
         state = MeleeState.Circle;
-        stateTimer = Random.Range(1f, 2.5f);
+        stateTimer = GetPostLungeCircleDuration();
     }
 
     private void FixedUpdate()
@@ -223,7 +235,7 @@ public class MeleeEnemy : EnemyBase
                 if (dist <= circleDistance)
                 {
                     state = MeleeState.Circle;
-                    stateTimer = Random.Range(1f, 3f);
+                    stateTimer = GetCircleDuration();
                 }
                 break;
 
@@ -231,10 +243,10 @@ public class MeleeEnemy : EnemyBase
                 if (stateTimer <= 0f)
                 {
                     state = MeleeState.Lunge;
-                    stateTimer = 0.4f;
+                    stateTimer = GetLungeDuration();
                 }
                 // If player gets too far, go back to approaching
-                if (dist > circleDistance * 1.8f)
+                if (dist > circleDistance * 1.5f)
                 {
                     state = MeleeState.Approach;
                 }
@@ -244,7 +256,7 @@ public class MeleeEnemy : EnemyBase
                 if (stateTimer <= 0f || dist <= stopDistance)
                 {
                     state = MeleeState.Circle;
-                    stateTimer = Random.Range(1.5f, 3f);
+                    stateTimer = GetPostLungeCircleDuration();
                 }
                 break;
         }
@@ -266,7 +278,7 @@ public class MeleeEnemy : EnemyBase
 
                 // Maintain distance — drift in/out
                 float distDiff = dist - circleDistance;
-                Vector2 circleDir = (perpendicular + toPlayer * distDiff * 0.5f).normalized;
+                Vector2 circleDir = (perpendicular + toPlayer * distDiff * 0.75f).normalized;
                 MoveWithAvoidance(circleDir * (strafeSpeed / moveSpeed));
 
                 // Occasionally switch strafe direction
@@ -274,7 +286,7 @@ public class MeleeEnemy : EnemyBase
                 if (nextStrafeSwitch <= 0f)
                 {
                     strafeDir *= -1f;
-                    nextStrafeSwitch = Random.Range(1.5f, 4f);
+                    nextStrafeSwitch = Random.Range(1.2f, 3.2f) / Mathf.Clamp(attackRateMultiplier, 0.5f, 3f);
                 }
                 break;
 
@@ -285,6 +297,22 @@ public class MeleeEnemy : EnemyBase
                 MoveWithAvoidance(lungeTarget);
                 break;
         }
+    }
+
+    private float GetCircleDuration()
+    {
+        return Random.Range(0.55f, 1.35f) / Mathf.Clamp(attackRateMultiplier, 0.5f, 3f);
+    }
+
+    private float GetPostLungeCircleDuration()
+    {
+        return Random.Range(0.45f, 1.0f) / Mathf.Clamp(attackRateMultiplier, 0.5f, 3f);
+    }
+
+    private float GetLungeDuration()
+    {
+        float clampedAggression = Mathf.Clamp(aggressionMultiplier, 0.5f, 3f);
+        return Mathf.Max(0.35f, 0.45f * clampedAggression);
     }
 
     private void SetWalkingVisual(bool isWalking)

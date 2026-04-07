@@ -22,6 +22,9 @@ public class PauseMenuUI : MonoBehaviour
     [Header("Settings Defaults")]
     [Range(0f, 1f)] public float defaultMasterVolume = 1f;
 
+    [Header("Scene Routing")]
+    public string mainMenuSceneName = "Menu";
+
     [Header("Menu UI SFX")]
     public AudioClip buttonSelectSfx;
     [Range(0f, 1f)] public float buttonSelectSfxVolume = 1f;
@@ -51,6 +54,7 @@ public class PauseMenuUI : MonoBehaviour
     private GameObject canvasRoot;
     private GameObject mainPanel;
     private GameObject settingsPanel;
+    private RectTransform settingsPanelRect;
     private Image backdropImage;
     private Slider volumeSlider;
     private Text volumeValueLabel;
@@ -83,6 +87,13 @@ public class PauseMenuUI : MonoBehaviour
     private AudioSource uiSfxSource;
     private float lastHighlightSfxTime = -10f;
     private GameObject lastHighlightedButton;
+    private bool showingFullscreenSettingsFromMainMenu;
+    private bool hasCachedSettingsPanelLayout;
+    private Vector2 settingsPanelAnchorMin;
+    private Vector2 settingsPanelAnchorMax;
+    private Vector2 settingsPanelPivot;
+    private Vector2 settingsPanelAnchoredPosition;
+    private Vector2 settingsPanelSizeDelta;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void AutoCreate()
@@ -220,11 +231,13 @@ public class PauseMenuUI : MonoBehaviour
         isPaused = false;
         RestoreCursorState();
 
-#if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;
-#else
-        Application.Quit();
-#endif
+        if (!string.IsNullOrWhiteSpace(mainMenuSceneName))
+        {
+            SceneManager.LoadScene(mainMenuSceneName);
+            return;
+        }
+
+        SceneManager.LoadScene(0);
     }
 
     private void OpenSettingsPanel()
@@ -240,6 +253,15 @@ public class PauseMenuUI : MonoBehaviour
     private void ShowMainPanel()
     {
         CancelRebind(true);
+
+        if (showingFullscreenSettingsFromMainMenu)
+        {
+            showingFullscreenSettingsFromMainMenu = false;
+            ApplySettingsPanelLayout(false);
+            SetMenuVisible(false);
+            RestoreCursorState();
+            return;
+        }
 
         if (mainPanel != null)
             mainPanel.SetActive(true);
@@ -401,7 +423,7 @@ public class PauseMenuUI : MonoBehaviour
         CreateStyledButton("ResumeButton", panel.transform, "Resume", new Vector2(0f, btnY), btnSize, ResumeGame);
         CreateStyledButton("RestartButton", panel.transform, "Restart", new Vector2(0f, btnY - btnSpacing), btnSize, RestartCurrentScene);
         CreateStyledButton("SettingsButton", panel.transform, "Settings", new Vector2(0f, btnY - btnSpacing * 2), btnSize, OpenSettingsPanel);
-        CreateStyledButton("ExitButton", panel.transform, "Exit Game", new Vector2(0f, btnY - btnSpacing * 3), btnSize, ExitGame);
+        CreateStyledButton("ExitButton", panel.transform, "Exit To Menu", new Vector2(0f, btnY - btnSpacing * 3), btnSize, ExitGame);
 
         // Bottom ornament line
         AddHorizontalLine(panel.transform, new Vector2(0f, -195f), 320f, accentLine);
@@ -417,6 +439,7 @@ public class PauseMenuUI : MonoBehaviour
         RectTransform panelRect = CreateRect("SettingsPanel", parent,
             new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
             new Vector2(0.5f, 0.5f), Vector2.zero, panelSize);
+        settingsPanelRect = panelRect;
         GameObject panel = panelRect.gameObject;
 
         Image panelImage = panel.AddComponent<Image>();
@@ -620,6 +643,66 @@ public class PauseMenuUI : MonoBehaviour
         AddHorizontalLine(panel.transform, new Vector2(0f, y - 56f), 400f, accentLine);
 
         return panel;
+    }
+
+    public void OpenSettingsFullscreenFromMainMenu()
+    {
+        BuildUi();
+        CancelRebind(true);
+
+        Time.timeScale = 1f;
+        isPaused = false;
+        ApplyPausedCursorState();
+
+        showingFullscreenSettingsFromMainMenu = true;
+        SetMenuVisible(true);
+        ApplySettingsPanelLayout(true);
+
+        if (mainPanel != null)
+            mainPanel.SetActive(false);
+        if (settingsPanel != null)
+            settingsPanel.SetActive(true);
+
+        RefreshKeybindLabels();
+    }
+
+    private void ApplySettingsPanelLayout(bool fullscreen)
+    {
+        if (settingsPanelRect == null)
+            return;
+
+        if (!hasCachedSettingsPanelLayout)
+        {
+            settingsPanelAnchorMin = settingsPanelRect.anchorMin;
+            settingsPanelAnchorMax = settingsPanelRect.anchorMax;
+            settingsPanelPivot = settingsPanelRect.pivot;
+            settingsPanelAnchoredPosition = settingsPanelRect.anchoredPosition;
+            settingsPanelSizeDelta = settingsPanelRect.sizeDelta;
+            hasCachedSettingsPanelLayout = true;
+        }
+
+        if (fullscreen)
+        {
+            settingsPanelRect.anchorMin = Vector2.zero;
+            settingsPanelRect.anchorMax = Vector2.one;
+            settingsPanelRect.pivot = new Vector2(0.5f, 0.5f);
+            settingsPanelRect.anchoredPosition = Vector2.zero;
+            settingsPanelRect.sizeDelta = Vector2.zero;
+
+            if (backdropImage != null)
+                backdropImage.color = new Color(bgOverlay.r, bgOverlay.g, bgOverlay.b, 1f);
+        }
+        else
+        {
+            settingsPanelRect.anchorMin = settingsPanelAnchorMin;
+            settingsPanelRect.anchorMax = settingsPanelAnchorMax;
+            settingsPanelRect.pivot = settingsPanelPivot;
+            settingsPanelRect.anchoredPosition = settingsPanelAnchoredPosition;
+            settingsPanelRect.sizeDelta = settingsPanelSizeDelta;
+
+            if (backdropImage != null)
+                backdropImage.color = bgOverlay;
+        }
     }
 
     private KeybindRow CreateKeybindRow(string actionName, Func<KeyCode> getter, Action<KeyCode> setter)

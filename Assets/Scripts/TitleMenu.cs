@@ -37,12 +37,24 @@ public class MainMenu : MonoBehaviour
     
     public void OpenSettings()
     {
-        //To be set up, idk what settings we need rn
+        PauseMenuUI pauseMenu = FindFirstObjectByType<PauseMenuUI>();
+        if (pauseMenu == null)
+        {
+            GameObject root = new GameObject("PauseMenuUI");
+            pauseMenu = root.AddComponent<PauseMenuUI>();
+        }
+
+        if (pauseMenu != null)
+            pauseMenu.OpenSettingsFullscreenFromMainMenu();
     }
 
     public void Quit()
     {
         print("Qutting Game");
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
         Application.Quit();
+#endif
     }
 }
